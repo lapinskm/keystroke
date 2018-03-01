@@ -3,11 +3,13 @@
 #
 import sys
 from PyQt4.QtGui import *
+from PyQt4.QtCore import QDateTime
 
 
 def on_key(key):
    print "### KEY text: " + key.text()
    print  key.key()
+   print  QDateTime.currentMSecsSinceEpoch()
 
 def on_keydown(key):
    print "############# key pressed  ###";
