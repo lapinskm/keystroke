@@ -5,6 +5,7 @@ import sys
 from PyQt4.QtGui import *
 from PyQt4.QtCore import QDateTime
 
+import recorderUi
 
 def on_key(key):
    print "### KEY text: " + key.text()
@@ -25,13 +26,11 @@ a = QApplication(sys.argv)
 
 # The QWidget widget is the base class of all user interface objects in PyQt4.
 w = QWidget()
+# Create ui
+ui = recorderUi.Ui_MainWindow()
+ui.setupUi(w)
 
 
-# Set window size.
-w.resize(320, 240)
-
-
-w.setWindowTitle("key stroke recorder")
 w.keyPressEvent=on_keydown
 w.keyReleaseEvent=on_keyup
 
