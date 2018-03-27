@@ -64,7 +64,7 @@ class Main:
      # Create ui
      self.ui = recorderUi.Ui_MainWindow()
      self.ui.setupUi(self.widget)
-
+     # Elapsed Time counter
      self.timer = QTimer()
      self.timer.timeout.connect(self.update_timer)
      self.elapsedTime=0
