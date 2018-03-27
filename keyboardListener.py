@@ -4,21 +4,50 @@
 import sys
 from PyQt4.QtGui import *
 from PyQt4.QtCore import QDateTime
+from PyQt4.QtCore import QTimer
 
 import recorderUi
 
 class Main:
 
+   def on_start_stop(self):
+      if not self.running:
+         self.running=True
+         self.start_recording()
+      else:
+         self.running=False
+         self.stop_recording()
+
+   def start_recording(self):
+      self.log_text("recording started")
+      self.timer.start(1000)
+      self.ui.timeDisplay.display(0)
+      self.ui.startStopButton.setText("Stop recording")
+      self.elapsedTime=0
+
+   def stop_recording(self):
+      self.log_text("recording stopped")
+      self.ui.startStopButton.setText("Start recording")
+      self.timer.stop()
+
+   def update_timer(self):
+      self.elapsedTime = self.elapsedTime + 1
+      self.ui.timeDisplay.display (self.elapsedTime)
+
+   def log_text(self, text):
+      self.ui.logDisplay.append(text)
+      print text
+
    def log_key(self, key, isUp):
+      if not self.running:
+         return
       date = QDateTime.currentMSecsSinceEpoch()
       logText=str(date)+":"+str(key.key())+"("+ key.text()+") "
       if isUp:
          logText=logText+"pressed"
       else:
          logText=logText+"released"
-      self.ui.logDisplay.append(logText)
-      print logText
-
+      self.log_text(logText)
 
    def on_keydown(self, key):
       self.log_key(key, True)
@@ -36,7 +65,14 @@ class Main:
      self.ui = recorderUi.Ui_MainWindow()
      self.ui.setupUi(self.widget)
 
-     self.widget.keyPressEvent   = self.on_keydown
+     self.timer = QTimer()
+     self.timer.timeout.connect(self.update_timer)
+     self.elapsedTime=0
+
+     self.ui.startStopButton.clicked.connect(self.on_start_stop)
+     self.running=False
+
+     self.widget.keyPressEvent = self.on_keydown
      self.widget.keyReleaseEvent = self.on_keyup
    
    def run(self):
