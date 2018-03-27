@@ -9,18 +9,22 @@ import recorderUi
 
 class Main:
 
-   def on_key(self, key):
-      print "### KEY text: " + key.text()
-      print  key.key()
-      print  QDateTime.currentMSecsSinceEpoch()
+   def log_key(self, key, isUp):
+      date = QDateTime.currentMSecsSinceEpoch()
+      logText=str(date)+":"+str(key.key())+"("+ key.text()+") "
+      if isUp:
+         logText=logText+"pressed"
+      else:
+         logText=logText+"released"
+      self.ui.logDisplay.append(logText)
+      print logText
+
 
    def on_keydown(self, key):
-      print "############# key pressed  ###";
-      self.on_key(key)
+      self.log_key(key, True)
 
    def on_keyup(self, key):
-      print "############# key released ###";
-      self.on_key(key)
+      self.log_key(key, False)
 
    def __init__(self):
       # Create an PyQT4 application object.
