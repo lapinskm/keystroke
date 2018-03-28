@@ -55,11 +55,11 @@ class Main:
       if not self.running:
          return
       date = QDateTime.currentMSecsSinceEpoch()
-      logText=str(date)+":"+str(key.key())+"("+ key.text()+") "
+      logText = str(date) + ":" + str(key.key()) + "(" + key.text() + ") "
       if isUp:
-         logText=logText+"pressed"
+         logText = logText + "pressed"
       else:
-         logText=logText+"released"
+         logText = logText + "released"
       self.log_text(logText)
 
    def on_keydown(self, key):
@@ -80,11 +80,11 @@ class Main:
      # Elapsed Time counter
      self.timer = QTimer()
      self.timer.timeout.connect(self.update_timer)
-     self.elapsedTime=0
+     self.elapsedTime = 0
 
      #start/stop button
      self.ui.startStopButton.clicked.connect(self.on_start_stop)
-     self.running=False
+     self.running = False
 
      #browse files buttons
      self.keyFileName=""
