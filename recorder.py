@@ -30,10 +30,10 @@ class Main:
       self.ui.keyRecordingFileEdit.setText(self.keyFileName)
 
    def on_browse_audio_file(self):
-     self.audioFileName = QFileDialog.getSaveFileName(self.widget,
+      self.audioFileName = QFileDialog.getSaveFileName(self.widget,
                      "Choose a path and filename of audio data",
                      "data.wav", filter="audio files (*.wav)")
-     self.ui.audioRecordingFileEdit.setText(self.audioFileName)
+      self.ui.audioRecordingFileEdit.setText(self.audioFileName)
 
 
    def start_recording(self):
@@ -79,35 +79,35 @@ class Main:
 
    def __init__(self):
       # Create an PyQT4 application object.
-     self.app = QApplication(sys.argv)
+      self.app = QApplication(sys.argv)
 
-     # The QWidget widget is the base class of all user interface objects in PyQt4.
-     self.widget = QWidget()
-     # Create ui
-     self.ui = recorderUi.Ui_MainWindow()
-     self.ui.setupUi(self.widget)
-     # Elapsed Time counter
-     self.timer = QTimer()
-     self.timer.timeout.connect(self.update_timer)
-     self.elapsedTime = 0
+      # The QWidget widget is the base class of all user interface objects in PyQt4.
+      self.widget = QWidget()
+      # Create ui
+      self.ui = recorderUi.Ui_MainWindow()
+      self.ui.setupUi(self.widget)
+      # Elapsed Time counter
+      self.timer = QTimer()
+      self.timer.timeout.connect(self.update_timer)
+      self.elapsedTime = 0
 
-     #start/stop button
-     self.ui.startStopButton.clicked.connect(self.on_start_stop)
-     self.running = False
+      #start/stop button
+      self.ui.startStopButton.clicked.connect(self.on_start_stop)
+      self.running = False
 
-     #browse files buttons
-     self.keyFileName=""
-     self.audioFileName=""
-     self.ui.keyRecordingFileBrowseButton.clicked.connect(self.on_browse_key_file)
-     self.ui.audioRecordingFileBrowseButton.clicked.connect(self.on_browse_audio_file)
+      #browse files buttons
+      self.keyFileName=""
+      self.audioFileName=""
+      self.ui.keyRecordingFileBrowseButton.clicked.connect(self.on_browse_key_file)
+      self.ui.audioRecordingFileBrowseButton.clicked.connect(self.on_browse_audio_file)
 
-     # Capture key input of widget
-     self.widget.keyPressEvent = self.on_keydown
-     self.widget.keyReleaseEvent = self.on_keyup
+      # Capture key input of widget
+      self.widget.keyPressEvent = self.on_keydown
+      self.widget.keyReleaseEvent = self.on_keyup
    
    def run(self):
-     # Show window
-     self.widget.show()
-     sys.exit(self.app.exec_())
+      # Show window
+      self.widget.show()
+      sys.exit(self.app.exec_())
 
 Main().run();
