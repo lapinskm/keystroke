@@ -1,4 +1,4 @@
 # generated UI files
 recorderUi.py
 recorderUi.pyc
-
+*.csv

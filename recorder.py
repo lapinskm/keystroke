@@ -1,7 +1,10 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+
+import csv
 import sys
+
 from PyQt4.QtGui import *
 from PyQt4.QtCore import QDateTime
 from PyQt4.QtCore import QTimer
@@ -26,24 +29,27 @@ class Main:
    def on_browse_key_file(self):
       self.keyFileName = QFileDialog.getSaveFileName(self.widget,
                      "Choose a path and filename of key data",
-                     "data.csv", filter="text data files (*.csv)")
+                     "data.csv", filter = "text data files (*.csv)")
       self.ui.keyRecordingFileEdit.setText(self.keyFileName)
 
    def on_browse_audio_file(self):
       self.audioFileName = QFileDialog.getSaveFileName(self.widget,
                      "Choose a path and filename of audio data",
-                     "data.wav", filter="audio files (*.wav)")
+                     "data.wav", filter = "audio files (*.wav)")
       self.ui.audioRecordingFileEdit.setText(self.audioFileName)
-
 
    def start_recording(self):
       self.log_text("recording started")
       self.timer.start(1000)
       self.ui.timeDisplay.display(0)
       self.ui.startStopButton.setText("Stop recording")
-      self.elapsedTime=0
+      self.elapsedTime = 0
       self.ui.keyRecordingFileBrowseButton.setDisabled(True)
       self.ui.audioRecordingFileBrowseButton.setDisabled(True)
+      self.keyFile = open(self.keyFileName, "w")
+      self.log_text("key input data will be saved to " + self.keyFileName)
+      csv.writer(self.keyFile).writerow(("timestamp", "key_code", "up_or_down"))
+
 
    def stop_recording(self):
       self.log_text("recording stopped")
@@ -51,6 +57,9 @@ class Main:
       self.timer.stop()
       self.ui.keyRecordingFileBrowseButton.setDisabled(False)
       self.ui.audioRecordingFileBrowseButton.setDisabled(False)
+      assert self.keyFile
+      self.keyFile.close()
+      self.log_text("key input data is saved to " + self.keyFileName)
 
    def update_timer(self):
       self.elapsedTime = self.elapsedTime + 1
@@ -70,6 +79,9 @@ class Main:
       else:
          logText = logText + "released"
       self.log_text(logText)
+      assert self.keyFile
+      csv.writer(self.keyFile).writerow((date, key.key(), "up" if isUp else "down"))
+      
 
    def on_keydown(self, key):
       self.log_key(key, True)
@@ -100,6 +112,8 @@ class Main:
       self.audioFileName=""
       self.ui.keyRecordingFileBrowseButton.clicked.connect(self.on_browse_key_file)
       self.ui.audioRecordingFileBrowseButton.clicked.connect(self.on_browse_audio_file)
+
+      self.keyFile=None
 
       # Capture key input of widget
       self.widget.keyPressEvent = self.on_keydown
