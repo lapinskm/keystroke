@@ -11,12 +11,17 @@ import recorderUi
 class Main:
 
    def on_start_stop(self):
-      if not self.running:
+      if not self.running and self.files_are_set():
          self.running=True
          self.start_recording()
-      else:
+      elif self.running:
          self.running=False
          self.stop_recording()
+      elif not self.files_are_set():
+         self.log_text("Files are not set!")
+
+   def files_are_set(self):
+      return self.keyFileName and self.audioFileName
 
    def on_browse_key_file(self):
       self.keyFileName = QFileDialog.getSaveFileName(self.widget,
@@ -37,11 +42,15 @@ class Main:
       self.ui.timeDisplay.display(0)
       self.ui.startStopButton.setText("Stop recording")
       self.elapsedTime=0
+      self.ui.keyRecordingFileBrowseButton.setDisabled(True)
+      self.ui.audioRecordingFileBrowseButton.setDisabled(True)
 
    def stop_recording(self):
       self.log_text("recording stopped")
       self.ui.startStopButton.setText("Start recording")
       self.timer.stop()
+      self.ui.keyRecordingFileBrowseButton.setDisabled(False)
+      self.ui.audioRecordingFileBrowseButton.setDisabled(False)
 
    def update_timer(self):
       self.elapsedTime = self.elapsedTime + 1
