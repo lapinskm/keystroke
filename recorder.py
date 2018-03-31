@@ -1,13 +1,17 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 
 import csv
 import sys
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import QDateTime
-from PyQt4.QtCore import QTimer
+from PyQt5.QtCore import QDateTime
+from PyQt5.QtCore import QTimer
+
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QWidget
+
 
 import recorderUi
 
@@ -29,45 +33,53 @@ class Main:
    def on_browse_key_file(self):
       self.keyFileName = QFileDialog.getSaveFileName(self.widget,
                      "Choose a path and filename of key data",
-                     "data.csv", filter = "text data files (*.csv)")
+                     "data.csv", filter = "text data files (*.csv)")[0]
       self.ui.keyRecordingFileEdit.setText(self.keyFileName)
 
    def on_browse_audio_file(self):
       self.audioFileName = QFileDialog.getSaveFileName(self.widget,
                      "Choose a path and filename of audio data",
-                     "data.wav", filter = "audio files (*.wav)")
+                     "data.wav", filter = "audio files (*.wav)")[0]
       self.ui.audioRecordingFileEdit.setText(self.audioFileName)
 
    def start_recording(self):
       self.log_text("recording started")
-      self.timer.start(1000)
+
+      #ui behaviour
+      self.uiTimer.start()
       self.ui.timeDisplay.display(0)
       self.ui.startStopButton.setText("Stop recording")
       self.elapsedTime = 0
       self.ui.keyRecordingFileBrowseButton.setDisabled(True)
       self.ui.audioRecordingFileBrowseButton.setDisabled(True)
+
+      #key recording
+      assert self.keyFileName
       self.keyFile = open(self.keyFileName, "w")
       self.log_text("key input data will be saved to " + self.keyFileName)
       csv.writer(self.keyFile).writerow(("timestamp", "key_code", "up_or_down"))
 
 
    def stop_recording(self):
+      #ui behaviour
       self.log_text("recording stopped")
       self.ui.startStopButton.setText("Start recording")
-      self.timer.stop()
+      self.uiTimer.stop()
       self.ui.keyRecordingFileBrowseButton.setDisabled(False)
       self.ui.audioRecordingFileBrowseButton.setDisabled(False)
+
+      #key recording
       assert self.keyFile
       self.keyFile.close()
       self.log_text("key input data is saved to " + self.keyFileName)
 
-   def update_timer(self):
+   def update_ui_timer(self):
       self.elapsedTime = self.elapsedTime + 1
       self.ui.timeDisplay.display (self.elapsedTime)
 
    def log_text(self, text):
       self.ui.logDisplay.append(text)
-      print text
+      print(text)
 
    def log_key(self, key, isUp):
       if not self.running:
@@ -93,14 +105,15 @@ class Main:
       # Create an PyQT4 application object.
       self.app = QApplication(sys.argv)
 
-      # The QWidget widget is the base class of all user interface objects in PyQt4.
-      self.widget = QWidget()
       # Create ui
+      self.widget = QWidget()
       self.ui = recorderUi.Ui_MainWindow()
       self.ui.setupUi(self.widget)
+
       # Elapsed Time counter
-      self.timer = QTimer()
-      self.timer.timeout.connect(self.update_timer)
+      self.uiTimer = QTimer()
+      self.uiTimer.timeout.connect(self.update_ui_timer)
+      self.uiTimer.setInterval(1000)
       self.elapsedTime = 0
 
       #start/stop button
@@ -108,12 +121,12 @@ class Main:
       self.running = False
 
       #browse files buttons
-      self.keyFileName=""
-      self.audioFileName=""
+      self.keyFileName = ""
+      self.audioFileName = ""
       self.ui.keyRecordingFileBrowseButton.clicked.connect(self.on_browse_key_file)
       self.ui.audioRecordingFileBrowseButton.clicked.connect(self.on_browse_audio_file)
 
-      self.keyFile=None
+      self.keyFile = None
 
       # Capture key input of widget
       self.widget.keyPressEvent = self.on_keydown
