@@ -7,6 +7,11 @@ import sys
 
 from PyQt5.QtCore import QDateTime
 from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QUrl
+
+from PyQt5.QtMultimedia import QAudioRecorder
+from PyQt5.QtMultimedia import QAudioEncoderSettings
+from PyQt5.QtMultimedia import QMultimedia
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QFileDialog
@@ -14,6 +19,10 @@ from PyQt5.QtWidgets import QWidget
 
 
 import recorderUi
+
+#Audio recorder constants
+CODEC = "audio/wav"
+QUALITY = QMultimedia.VeryHighQuality
 
 class Main:
 
@@ -59,6 +68,13 @@ class Main:
       self.log_text("key input data will be saved to " + self.keyFileName)
       csv.writer(self.keyFile).writerow(("timestamp", "key_code", "up_or_down"))
 
+      #audio recording
+      assert self.audioFileName
+      self.audioRecorder.setOutputLocation(QUrl.fromLocalFile(self.audioFileName))
+      self.log_text("audio input data will be saved to " + self.audioFileName)
+      self.audioRecorder.record()
+
+
 
    def stop_recording(self):
       #ui behaviour
@@ -72,6 +88,11 @@ class Main:
       assert self.keyFile
       self.keyFile.close()
       self.log_text("key input data is saved to " + self.keyFileName)
+      #audio recording
+      assert self.audioFileName
+      self.audioRecorder.stop()
+      self.log_text("audio input data is saved to " + self.audioFileName)
+
 
    def update_ui_timer(self):
       self.elapsedTime = self.elapsedTime + 1
@@ -127,6 +148,13 @@ class Main:
       self.ui.audioRecordingFileBrowseButton.clicked.connect(self.on_browse_audio_file)
 
       self.keyFile = None
+
+      # Audio recording setup
+      self.audioRecorder = QAudioRecorder()
+      audioSettings = QAudioEncoderSettings()
+      audioSettings.setCodec(CODEC)
+      audioSettings.setQuality(QUALITY)
+      self.audioRecorder.setEncodingSettings(audioSettings)
 
       # Capture key input of widget
       self.widget.keyPressEvent = self.on_keydown
