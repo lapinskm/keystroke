@@ -3,7 +3,10 @@
 #
 
 import csv
+import pyaudio
 import sys
+import wave
+
 
 from PyQt5.QtCore import QDateTime
 from PyQt5.QtCore import QTimer
@@ -14,6 +17,12 @@ from PyQt5.QtWidgets import QWidget
 
 
 import recorderUi
+
+#Audio recorder constants
+FORMAT = pyaudio.paInt16
+CHANNELS = 2
+RATE = 44100
+CHUNK = 8192
 
 class Main:
 
@@ -59,6 +68,22 @@ class Main:
       self.log_text("key input data will be saved to " + self.keyFileName)
       csv.writer(self.keyFile).writerow(("timestamp", "key_code", "up_or_down"))
 
+      #audio recording
+      assert self.audioFileName
+      self.log_text("audio input data will be saved to " + self.audioFileName)
+      self.audioStream = self.audioApi.open(format=FORMAT, channels=CHANNELS,
+                                            rate=RATE, input=True,
+                                            frames_per_buffer=CHUNK)
+      self.audioFile = wave.open(self.audioFileName, 'wb')
+      self.audioFile.setnchannels(CHANNELS)
+      self.audioFile.setsampwidth(self.audioApi.get_sample_size(FORMAT))
+      self.audioFile.setframerate(RATE)
+      self.audioRecorderTimer.start()
+
+   def on_record_audio_timer(self):
+      assert self.running
+      data = self.audioStream.read(CHUNK)
+      self.audioFile.writeframes(b''.join([data]))
 
    def stop_recording(self):
       #ui behaviour
@@ -72,6 +97,15 @@ class Main:
       assert self.keyFile
       self.keyFile.close()
       self.log_text("key input data is saved to " + self.keyFileName)
+
+      #audio recording
+      self.audioRecorderTimer.stop()
+      assert self.audioFileName
+      self.audioStream.stop_stream()
+      self.audioStream.close()
+      self.audioFile.close()
+      self.log_text("audio input data is saved to " + self.audioFileName)
+
 
    def update_ui_timer(self):
       self.elapsedTime = self.elapsedTime + 1
@@ -128,6 +162,12 @@ class Main:
 
       self.keyFile = None
 
+      # Audio recording setup
+      self.audioApi = pyaudio.PyAudio()
+      self.audioRecorderTimer = QTimer()
+      self.audioRecorderTimer.setInterval(0)
+      self.audioRecorderTimer.timeout.connect(self.on_record_audio_timer)
+
       # Capture key input of widget
       self.widget.keyPressEvent = self.on_keydown
       self.widget.keyReleaseEvent = self.on_keyup
@@ -136,5 +176,6 @@ class Main:
       # Show window
       self.widget.show()
       sys.exit(self.app.exec_())
+      self.audioApi.terminate()
 
 Main().run();
