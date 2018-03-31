@@ -1,4 +1,7 @@
-# generated UI files
+# generated files
 recorderUi.py
 recorderUi.pyc
+__pycache__
+# output files
 *.csv
+*.wav
