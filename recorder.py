@@ -67,7 +67,7 @@ class Main:
       self.keyFile = open(self.keyFileName, "w")
       self.log_text("key input data will be saved to " + self.keyFileName)
       csv.writer(self.keyFile).writerow(("timestamp", "key_code", "up_or_down"))
-
+      self.startTime = QDateTime.currentMSecsSinceEpoch()
       #audio recording
       assert self.audioFileName
       self.log_text("audio input data will be saved to " + self.audioFileName)
@@ -97,6 +97,7 @@ class Main:
       assert self.keyFile
       self.keyFile.close()
       self.log_text("key input data is saved to " + self.keyFileName)
+      self.startTime = 0
 
       #audio recording
       self.audioRecorderTimer.stop()
@@ -118,15 +119,16 @@ class Main:
    def log_key(self, key, isUp):
       if not self.running:
          return
-      date = QDateTime.currentMSecsSinceEpoch()
-      logText = str(date) + ":" + str(key.key()) + "(" + key.text() + ") "
+      assert self.startTime
+      time = QDateTime.currentMSecsSinceEpoch() - self.startTime
+      logText = str(time) + ":" + str(key.key()) + "(" + key.text() + ") "
       if isUp:
          logText = logText + "pressed"
       else:
          logText = logText + "released"
       self.log_text(logText)
       assert self.keyFile
-      csv.writer(self.keyFile).writerow((date, key.key(), "up" if isUp else "down"))
+      csv.writer(self.keyFile).writerow((time, key.key(), "up" if isUp else "down"))
       
 
    def on_keydown(self, key):
@@ -161,6 +163,7 @@ class Main:
       self.ui.audioRecordingFileBrowseButton.clicked.connect(self.on_browse_audio_file)
 
       self.keyFile = None
+      self.startTime = 0
 
       # Audio recording setup
       self.audioApi = pyaudio.PyAudio()
